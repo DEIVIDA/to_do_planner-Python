@@ -122,13 +122,14 @@ while True:
                     text_color="black",
                     justification="center",
                     enable_events=True,
-                    row_colors=[(i,'white') for i in range(10)]
+                    row_colors=[(i,'white') for i in range(10)],
+                    select_mode=sg.TABLE_SELECT_MODE_BROWSE
                 )
             ],
-            [sg.Button("Back", font=("Helvetica", 14)), sg.Button('Change status', font=("Helvetica", 14)) ]
+            [sg.Button("Back", font=("Helvetica", 14)), sg.Button('Change status', font=("Helvetica", 14), key='-STATUS-') ]
         ]
 
-        table_window = sg.Window("Tasks table", table_layout, finalize=True)
+        table_window = sg.Window("Tasks table", table_layout)
         status_choices = ['in progress', 'done', 'Late']
         def custom_status_element(key, status):
             return sg.Combo(values=status_choices, default_value=status, key=key, background_color='white')
@@ -138,19 +139,19 @@ while True:
 
             if table_event == 'Back' or table_event == sg.WIN_CLOSED:
                 break
-            elif table_event == 'Change status':
-                selected_row = table_values['-TABLE-'][0] 
+            elif table_event == '-STATUS-':
+                if table_values['-TABLE-']:
+                    selected_row_index = table_values['-TABLE-'][0]
 
-                if selected_row:
-                    status_element = custom_status_element('-STATUS-', selected_row[3])
+                    status_element = custom_status_element('-STATUS-', table_values['-TABLE-'][selected_row_index])
 
-                    layout = [
+                    status_layout = [
                         [sg.Text('Select Status:', pad=(0, (0, 10)))],
                         [status_element],
                         [sg.Button('OK'), sg.Button('Cancel')]
                     ]
 
-                    status_window = sg.Window('Select Status', layout, finalize=True, keep_on_top=True)
+                    status_window = sg.Window('Select Status', status_layout, finalize=True, keep_on_top=True)
 
                     while True:
                         status_event, status_values = status_window.read()
@@ -160,13 +161,14 @@ while True:
 
                         elif status_event == 'OK':
                             new_status = status_values['-STATUS-']
-                            green_team.task_list[selected_row[0]].status = new_status
-                            table_values[selected_row[0]][3] = new_status
+                            print(new_status)
+                            green_team.task_list[selected_row_index].status = new_status
+                            table_values = []
+                            for task in green_team.task_list:
+                                table_values.append([task.name, task.description, task.deadline, task.status])
                             table_window['-TABLE-'].update(values=table_values)
-
-                            # window['-TABLE-'].update(values=[(task.name, task.description, task.time_left, task.status) for task in green_team.task_list])
-
-                    status_window.close()
+                            status_window.close()
+                            break
 
         table_window.close()
         window.un_hide()
