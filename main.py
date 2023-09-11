@@ -36,11 +36,12 @@ task_add_layout = [
         sg.InputText(key="-DESCRIPTION-"),
     ],
     [
-        sg.Text("task deadline(YYYY/MM/DD, HH:MM)", font=("Helvetica", 12)),
+        sg.Text("Task deadline (MM/DD, HH:MM)", font=("Helvetica", 12)),
         sg.InputText(key="-DEADLINE-"),
     ],
     [sg.Button("Submit info", font=("Helvetica", 14))],
 ]
+
 
 task_add_window = sg.Window("Additional layout", task_add_layout, finalize=True)
 task_add_window.hide()
@@ -92,7 +93,7 @@ while True:
         for task in green_team.task_list:
             if isinstance(task.deadline, str):
                 try:
-                    task.deadline = datetime.strptime(task.deadline, "%Y/%m/%d, %H:%M")
+                    task.deadline = datetime.strptime(f"2023/{task.deadline}", "%Y/%m/%d, %H:%M")
                 except ValueError:
                     try:
                         task.deadline = datetime.strptime(task.deadline, "%Y/%m/%d %H:%M")
